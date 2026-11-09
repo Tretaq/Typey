@@ -1,6 +1,13 @@
-cmake_minimum_required(VERSION 4.3)
-project(Typey)
+cmake_minimum_required(VERSION 3.20)
+
+project(Typey CXX)
 
 set(CMAKE_CXX_STANDARD 20)
 
-add_executable(Typey main.cpp)
+find_package(Curses REQUIRED)
+
+add_executable(Typey main.cpp
+        Terminal.hpp)
+target_include_directories(Typey PRIVATE ${CURSES_INCLUDE_DIRS})
+target_link_libraries(Typey PRIVATE ${CURSES_LIBRARIES})
+
