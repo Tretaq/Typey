@@ -7,7 +7,8 @@ set(CMAKE_CXX_STANDARD 20)
 find_package(Curses REQUIRED)
 
 add_executable(Typey main.cpp
-        Terminal.hpp)
+        Terminal.hpp
+        typing.hpp)
 target_include_directories(Typey PRIVATE ${CURSES_INCLUDE_DIRS})
 target_link_libraries(Typey PRIVATE ${CURSES_LIBRARIES})
 
