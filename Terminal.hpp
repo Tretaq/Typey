@@ -9,6 +9,7 @@ public:
         noecho();
         keypad(stdscr, TRUE);
         set_escdelay(25);
+        curs_set(0);
     }
     ~Terminal() {
         endwin();
