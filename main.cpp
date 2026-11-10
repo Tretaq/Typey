@@ -25,7 +25,7 @@ void drawText(const TypingState& state, const std::vector<Point>& layout, int or
         }
     }
 }
-void drawFrame(const TypingState& state, std::vector<Point>& layout, int originX, int originY) {
+void drawFrame(TypingState& state, std::vector<Point>& layout, int originX, int originY) {
     erase();
     mvprintw(0,0, "Typey   Esc: quit");
     drawText(state,layout, originX, originY);
@@ -36,16 +36,16 @@ int main() {
     Terminal terminal;
     TypingState state;
     state.target = "The quick Abrams kills Ivy on Summoners Rift while playing on ukulele";
-    const int len = static_cast<int>(state.target.size());
-    int OriginX = 0;
-    int OriginY = 0;
     int width = std::min(COLS - 4, 60);
-    bool running = true;
     std::vector<Point> layout = layoutText(state.target, width);
+
+    int originX = (COLS - width) / 2;
+    int originY = (LINES - (layout.back().y + 1)) /2;
+
+    bool running = true;
+
     while (running){
-        erase();
-        drawFrame(state,layout,OriginX,OriginY);
-        refresh();
+        drawFrame(state,layout,originX,originY);
 
         const int key = getch();
         switch (key){
