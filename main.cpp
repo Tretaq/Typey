@@ -1,3 +1,4 @@
+#include <algorithm>
 #include <ncurses.h>
 #include <vector>
 
@@ -24,22 +25,37 @@ void drawText(const TypingState& state, const std::vector<Point>& layout, int or
         }
     }
 }
+void drawFrame(const TypingState& state, std::vector<Point>& layout, int originX, int originY) {
+    erase();
+    mvprintw(0,0, "Typey   Esc: quit");
+    drawText(state,layout, originX, originY);
+    refresh();
+}
 
 int main() {
     Terminal terminal;
     TypingState state;
     state.target = "The quick Abrams kills Ivy on Summoners Rift while playing on ukulele";
     const int len = static_cast<int>(state.target.size());
+    int OriginX = 0;
+    int OriginY = 0;
+    int width = std::min(COLS - 4, 60);
     bool running = true;
+    std::vector<Point> layout = layoutText(state.target, width);
     while (running){
         erase();
-        mvprintw(LINES / 2, (COLS - len) / 2, "%s", state.target.c_str() );
+        drawFrame(state,layout,OriginX,OriginY);
         refresh();
 
         const int key = getch();
         switch (key){
         case keyEsc: running = false ; break;
-            default: break;
+                default:
+                if (key >= ' ' && key <= '~' && !state.finished()) {
+                    ++state.pos;
+                }
+                break;
+
         }
     }
     return 0;
