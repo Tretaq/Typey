@@ -40,6 +40,9 @@ void drawText(const TypingState& state, const std::vector<Point>& layout, int or
 
     }
 }
+void drawStats(const TypingState& state, int originX, int y) {
+    mvprintw(y, originX, "WPM %.0f  ACC %d%%    %.1fs", )
+}
 void drawFrame(const TypingState& state,const std::vector<Point>& layout, int originX, int originY) {
     erase();
     mvprintw(0,0, "Typey   Esc: quit");

@@ -14,6 +14,7 @@ public:
         curs_set(0);
         init_pair(1,COLOR_GREEN,-1);// default bg
         init_pair(2,COLOR_RED,-1);
+        timeout(50);
     }
     ~Terminal() {
         endwin();

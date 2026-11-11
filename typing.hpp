@@ -36,30 +36,57 @@ struct TypingState {
         return typed[i] == target[i];
     }
     void typeChar(char c) {
-        if (phase != Phase::Done){
-            if (phase == Phase::Waiting) {
-                startTime = Clock::now();
-                phase = Phase::Running;
-            }
-            if (!finished()) {
-                typed.push_back(c);
-            }
-            if (!isCorrect(typed.size())) {
-                errors++;
-            }
-            keystrokes++;
-            if (typed.size() == target.size()) {
-                endTime = Clock::now();
-                phase = Phase::Done;
-            }
-    }
+        if (finished()) return;
+        if (phase == Phase::Waiting) {
+            startTime = Clock::now();
+            phase = Phase::Running;
+        }
+        if (c != target[typed.size()]) {
+            ++errors;
+        }
+        ++keystrokes;
+        typed.push_back(c);
+        if (typed.size() == target.size()) {
+            endTime = Clock::now();
+            phase = Phase::Done;
+        }
     }
     void backspace() {
         if (!typed.empty() && phase != Phase::Done) {
             typed.pop_back();
         }
     }
+    size_t correctChars() {
+        size_t count =0;
+        for (int i = 0 ; i < target.size(); i++) {
+            if (target[i] == typed[i]) {
+                count++;
+            }
+        }
+        return count;
+    }
+     double wpm() {
+        const double minutes = elapsedSeconds() / 60.0;
+        if (minutes < 1.00 / 60.0) return 0.0;
+        return (correctChars() / 5.0) / minutes;
+    }
+    size_t rawWpm() {
+        const double minutes = elapsedSeconds() / 60.0;
+        if (minutes < 1.00 / 60.0) return 0.0;
+        return (keystrokes / 5.0) / minutes;
+    }
+    size_t accuracy() {
+        if (keystrokes == 0) return 100;
+        return 100 * (keystrokes - errors) / keystrokes;
+    }
+    void reset() {
+        typed = "";
+        startTime = Clock::now();
+
+    }
 };
+
+
 
 
 
