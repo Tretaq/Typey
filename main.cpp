@@ -1,7 +1,6 @@
 #include <algorithm>
 #include <ncurses.h>
 #include <vector>
-
 #include "colors.hpp"
 #include "Terminal.hpp"
 #include "typing.hpp"
@@ -68,7 +67,7 @@ int main() {
         case keyEsc: running = false ; break;
             case KEY_BACKSPACE: case 127: state.backspace(); break;
                 default:
-                if (key >= ' ' && key <= '~' && !state.finished()) {
+                if (key >= ' ' && key <= '~' ) {
                     state.typeChar(static_cast<char>(key));
                 }
                 break;

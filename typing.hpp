@@ -2,6 +2,8 @@
 #include <string>
 #include <vector>
 
+#include "Time.hpp"
+
 struct Point {
     int x;
     int y;
@@ -9,28 +11,53 @@ struct Point {
 struct TypingState {
     std::string target;
     std::string typed;
-
+    Phase phase = Phase::Waiting;
+    Clock::time_point startTime;
+    Clock::time_point endTime;
+    int keystrokes = 0;
+    int errors = 0;
+    double elapsedSeconds() const {
+        using Sec = std::chrono::duration<double>;
+        switch (phase) {
+            case Phase::Waiting: return 0.0;
+            case Phase::Running: return Sec(Clock::now() - startTime).count();
+            case Phase::Done: return Sec(endTime - startTime).count();
+        }
+        return 0.0;
+    }
     std::size_t pos() const {
         return typed.size();
     }
     bool finished() const {
-        return pos() >= target.size();
+        return phase == Phase::Done;
     }
 
     bool isCorrect(std::size_t i) const {
         return typed[i] == target[i];
     }
     void typeChar(char c) {
-        if (typed.size() != target.size()) {
-            typed.push_back(c);
-        }
-        return;
+        if (phase != Phase::Done){
+            if (phase == Phase::Waiting) {
+                startTime = Clock::now();
+                phase = Phase::Running;
+            }
+            if (!finished()) {
+                typed.push_back(c);
+            }
+            if (!isCorrect(typed.size())) {
+                errors++;
+            }
+            keystrokes++;
+            if (typed.size() == target.size()) {
+                endTime = Clock::now();
+                phase = Phase::Done;
+            }
+    }
     }
     void backspace() {
-        if (!typed.empty()) {
+        if (!typed.empty() && phase != Phase::Done) {
             typed.pop_back();
         }
-        return;
     }
 };
 

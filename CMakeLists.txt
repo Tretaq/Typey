@@ -9,7 +9,8 @@ find_package(Curses REQUIRED)
 add_executable(Typey main.cpp
         Terminal.hpp
         typing.hpp
-        colors.hpp)
+        colors.hpp
+        Time.hpp)
 target_include_directories(Typey PRIVATE ${CURSES_INCLUDE_DIRS})
 target_link_libraries(Typey PRIVATE ${CURSES_LIBRARIES})
 
