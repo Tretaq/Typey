@@ -8,12 +8,32 @@ struct Point {
 };
 struct TypingState {
     std::string target;
-    std::size_t pos = 0;
+    std::string typed;
 
+    std::size_t pos() const {
+        return typed.size();
+    }
     bool finished() const {
-        return pos >= target.size();
+        return pos() >= target.size();
+    }
+
+    bool isCorrect(std::size_t i) const {
+        return typed[i] == target[i];
+    }
+    void typeChar(char c) {
+        typed = typed + c;
+        return;
+    }
+    void backspace() {
+        if (typed.empty()) {
+            typed.pop_back();
+        }
+        return;
     }
 };
+
+
+
 inline std::vector<Point> layoutText(const std::string& text, int width) {
     std::vector<Point> out(text.size());
     int x = 0;

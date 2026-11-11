@@ -2,6 +2,7 @@
 #include <ncurses.h>
 #include <vector>
 
+#include "colors.hpp"
 #include "Terminal.hpp"
 #include "typing.hpp"
 
@@ -12,9 +13,14 @@ void drawText(const TypingState& state, const std::vector<Point>& layout, int or
         const int x = originX + layout[i].x;
         const int y = originY + layout[i].y;
         const char c = state.target[i];
-        if (i < state.pos) {
+        Color color = ColRed;
+        if (state.isCorrect(i)) {
+            color = ColGreen;
+        }
+        attron(COLOR_PAIR(color));
+        if (i < state.pos()) {
             mvaddch(y,x,c);
-        } else if (i == state.pos){
+        } else if (i == state.pos()){
             attron(A_REVERSE);
             mvaddch(y,x,c);
             attroff(A_REVERSE);
@@ -23,9 +29,10 @@ void drawText(const TypingState& state, const std::vector<Point>& layout, int or
             mvaddch(y,x,c);
             attroff(A_DIM);
         }
+        attroff(COLOR_PAIR(color));
     }
 }
-void drawFrame(TypingState& state, std::vector<Point>& layout, int originX, int originY) {
+void drawFrame(const TypingState& state,const std::vector<Point>& layout, int originX, int originY) {
     erase();
     mvprintw(0,0, "Typey   Esc: quit");
     drawText(state,layout, originX, originY);
@@ -35,7 +42,7 @@ void drawFrame(TypingState& state, std::vector<Point>& layout, int originX, int 
 int main() {
     Terminal terminal;
     TypingState state;
-    state.target = "The quick Abrams kills Ivy on Summoners Rift while playing on ukulele";
+    state.target = "The quick Abrams kills Ivy on Summoners Rift while playing on Undertale";
     int width = std::min(COLS - 4, 60);
     std::vector<Point> layout = layoutText(state.target, width);
 
@@ -52,7 +59,7 @@ int main() {
         case keyEsc: running = false ; break;
                 default:
                 if (key >= ' ' && key <= '~' && !state.finished()) {
-                    ++state.pos;
+                    state.typeChar(key);
                 }
                 break;
 
