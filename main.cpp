@@ -14,12 +14,21 @@ void drawText(const TypingState& state, const std::vector<Point>& layout, int or
         const int y = originY + layout[i].y;
         const char c = state.target[i];
         Color color = ColRed;
-        if (state.isCorrect(i)) {
-            color = ColGreen;
-        }
-        attron(COLOR_PAIR(color));
+
         if (i < state.pos()) {
-            mvaddch(y,x,c);
+            if (state.isCorrect(i)) {
+                color = ColGreen;
+                attron(COLOR_PAIR(color));
+                mvaddch(y,x,c);
+                attroff(COLOR_PAIR(color));
+
+            } else {
+                attron(A_REVERSE);
+                attron(COLOR_PAIR(color));
+                mvaddch(y,x,c);
+                attroff(COLOR_PAIR(color));
+                attroff(A_REVERSE);
+            }
         } else if (i == state.pos()){
             attron(A_REVERSE);
             mvaddch(y,x,c);
@@ -29,7 +38,7 @@ void drawText(const TypingState& state, const std::vector<Point>& layout, int or
             mvaddch(y,x,c);
             attroff(A_DIM);
         }
-        attroff(COLOR_PAIR(color));
+
     }
 }
 void drawFrame(const TypingState& state,const std::vector<Point>& layout, int originX, int originY) {
@@ -57,9 +66,10 @@ int main() {
         const int key = getch();
         switch (key){
         case keyEsc: running = false ; break;
+            case KEY_BACKSPACE: case 127: state.backspace(); break;
                 default:
                 if (key >= ' ' && key <= '~' && !state.finished()) {
-                    state.typeChar(key);
+                    state.typeChar(static_cast<char>(key));
                 }
                 break;
 

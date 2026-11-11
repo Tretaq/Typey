@@ -21,11 +21,13 @@ struct TypingState {
         return typed[i] == target[i];
     }
     void typeChar(char c) {
-        typed = typed + c;
+        if (typed.size() != target.size()) {
+            typed.push_back(c);
+        }
         return;
     }
     void backspace() {
-        if (typed.empty()) {
+        if (!typed.empty()) {
             typed.pop_back();
         }
         return;
