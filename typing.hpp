@@ -1,7 +1,7 @@
 #pragma once
 #include <string>
 #include <vector>
-
+#include <chrono>
 #include "Time.hpp"
 
 struct Point {
@@ -56,32 +56,34 @@ struct TypingState {
             typed.pop_back();
         }
     }
-    size_t correctChars() {
+    size_t correctChars() const {
         size_t count =0;
-        for (int i = 0 ; i < target.size(); i++) {
+        for (size_t i = 0 ; i < typed.size(); i++) {
             if (target[i] == typed[i]) {
                 count++;
             }
         }
         return count;
     }
-     double wpm() {
+     double wpm() const {
         const double minutes = elapsedSeconds() / 60.0;
         if (minutes < 1.00 / 60.0) return 0.0;
         return (correctChars() / 5.0) / minutes;
     }
-    size_t rawWpm() {
+    double rawWpm() const {
         const double minutes = elapsedSeconds() / 60.0;
         if (minutes < 1.00 / 60.0) return 0.0;
         return (keystrokes / 5.0) / minutes;
     }
-    size_t accuracy() {
+    int accuracy() const{
         if (keystrokes == 0) return 100;
         return 100 * (keystrokes - errors) / keystrokes;
     }
     void reset() {
         typed = "";
-        startTime = Clock::now();
+        phase = Phase::Waiting;
+        keystrokes = 0;
+        errors = 0;
 
     }
 };
