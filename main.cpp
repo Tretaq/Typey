@@ -67,7 +67,7 @@ void drawFrame(const TypingState& state,const std::vector<Point>& layout, int or
 int main() {
     Terminal terminal;
     TypingState state;
-    state.target = "The quick Abrams kills Ivy on Summoners Rift while playing on Undertale";
+    state.target = "The quick Abrams kills Ivy on Summoners Rift while playing Undertale";
     int width = std::min(COLS - 4, 60);
     std::vector<Point> layout = layoutText(state.target, width);
 
