@@ -10,7 +10,9 @@ add_executable(Typey main.cpp
         Terminal.hpp
         typing.hpp
         colors.hpp
-        Time.hpp)
+        Time.hpp
+        worlds.hpp)
+configure_file(${CMAKE_SOURCE_DIR}/words.txt ${CMAKE_BINARY_DIR}/words.txt COPYONLY)
 target_include_directories(Typey PRIVATE ${CURSES_INCLUDE_DIRS})
 target_link_libraries(Typey PRIVATE ${CURSES_LIBRARIES})
 
