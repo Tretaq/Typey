@@ -1,4 +1,5 @@
 #include <algorithm>
+#include <iostream>
 #include <ncurses.h>
 #include <vector>
 #include "colors.hpp"
@@ -42,38 +43,44 @@ void drawText(const TypingState& state, const std::vector<Point>& layout, int or
 
     }
 }
-void drawStats(const TypingState& state, int originX, int y) {
+void drawStats(const TypingState& state, int originX, int y,Config config) {
     mvprintw(y, originX, "WPM %.0f  ACC %d%%    %.1fs", state.wpm(), state.accuracy(), state.elapsedSeconds());
 }
 void drawResult(const TypingState& state, int originX, int y) {
     attron(A_BOLD);
     mvprintw(y,originX, "DONE   WPM %.0f    raw %.0f    ACC %d%%    %.2fs",state.wpm(),state.rawWpm(),state.accuracy(),state.elapsedSeconds());
     attroff(A_BOLD);
-    mvprintw(y + 1, originX, "Enter: retry  Esc: quit");
+    mvprintw(y + 1, originX, "Enter: new passage    Tab: retry  Esc: quit");
 }
-void drawFrame(const TypingState& state,const std::vector<Point>& layout, int originX, int originY) {
+void drawFrame(const TypingState& state,const std::vector<Point>& layout, int originX, int originY, Config config) {
     erase();
-    mvprintw(0,0, "Typey   Esc: quit");
+    mvprintw(0,0, "Typey    seed=%u    words=%d    Tab: restart   Esc: quit",config.seed,config.wordCount);
     drawText(state,layout, originX, originY);
-
     const int lines = layout.back().y + 1;
     const int statsY = originY + lines +  1;
     if (state.finished()) {
         drawResult(state,originX,statsY);
     } else {
-        drawStats(state, originX, statsY);
+        drawStats(state, originX, statsY,config);
     }
     refresh();
 }
 
 int main(int argc, char *argv[]) {
-
-    Terminal terminal;
     Config config;
-    config = parseArgs(argc,argv);
+    try {
+        config = parseArgs(argc,argv);
+    } catch (const std::exception& e) {
+        std::cerr << "typey: invalid arguments " << e.what() << "\n";
+        return 1;
+    }
+    std::vector<std::string> words = loadWords(config.worldFile);
+    Terminal terminal;
+    std::random_device rnd;
+
     TypingState state;
     std::mt19937 rng(config.seed);
-    std::vector<std::string> words = loadWords(config.worldFile);
+
     state.target = generatePassage(words,config.wordCount,rng);
     int width = std::min(COLS - 4, 60);
     std::vector<Point> layout = layoutText(state.target, width);
@@ -84,14 +91,13 @@ int main(int argc, char *argv[]) {
     bool running = true;
 
     while (running){
-        drawFrame(state,layout,originX,originY);
+        drawFrame(state,layout,originX,originY,config);
 
         const int key = getch();
         switch (key){
         case keyEsc: running = false ; break;
-            case '\n': case KEY_ENTER: if (state.finished()) state.reset(); break;
+            case '\n': case KEY_ENTER: if (state.finished()) state.reset();; break;
             case KEY_BACKSPACE: case 127: state.backspace(); break;
-            case KEY_ENTER: state.reset(), std::mt19937 rng(config.seed); break;
             case '\t': state.reset(); break;
                 default:
                 if (key >= ' ' && key <= '~' ) {
