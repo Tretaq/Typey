@@ -14,7 +14,7 @@ inline std::vector<std::string> loadWords(const std::string& path) {
     if (words.empty()) {
         words = {"The","quick","Abrams","kills","Ivy","on","Summoners","Rift","while","playing","Undertale"};
     }
-    return words;a
+    return words;
 }
 inline std::string generatePassage(const std::vector<std::string>& words, int count, std::mt19937& rng) {
     std::uniform_int_distribution<std::size_t>pick(0,words.size() - 1);
@@ -26,6 +26,4 @@ inline std::string generatePassage(const std::vector<std::string>& words, int co
         passage += words[pick(rng)];
     }
     return passage;
-
-
 }

@@ -8,10 +8,11 @@ int wordCount = 25;
 };
 Config parseArgs(int argc, char** argv) {
     Config cfg;
-    for (int i = 1; i < argc = argv[i] ; ++i) {
+    for (int i = 1; i < argc  ; ++i) {
         std::string arg = argv[i];
             if (arg == "--words" && i + 1 < argc) {
                 cfg.wordCount = std::stoi(argv[++i]);
+                cfg.wordCount = std::clamp(cfg.wordCount,1,100);
             } else if (arg == "--seed" && i + 1 < argc) {
                 cfg.seed = static_cast<unsigned>(std::stoul(argv[++i]));
             } else if (arg == "--file" && i + 1 < argc) {

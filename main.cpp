@@ -2,8 +2,10 @@
 #include <ncurses.h>
 #include <vector>
 #include "colors.hpp"
+#include "config.hpp"
 #include "Terminal.hpp"
 #include "typing.hpp"
+#include "worlds.hpp"
 
 const int keyEsc = 27;
 void drawText(const TypingState& state, const std::vector<Point>& layout, int originX, int originY) {
@@ -64,10 +66,15 @@ void drawFrame(const TypingState& state,const std::vector<Point>& layout, int or
     refresh();
 }
 
-int main() {
+int main(int argc, char *argv[]) {
+
     Terminal terminal;
+    Config config;
+    config = parseArgs(argc,argv);
     TypingState state;
-    state.target = "The quick Abrams kills Ivy on Summoners Rift while playing Undertale";
+    std::mt19937 rng(config.seed);
+    std::vector<std::string> words = loadWords(config.worldFile);
+    state.target = generatePassage(words,config.wordCount,rng);
     int width = std::min(COLS - 4, 60);
     std::vector<Point> layout = layoutText(state.target, width);
 
@@ -84,6 +91,8 @@ int main() {
         case keyEsc: running = false ; break;
             case '\n': case KEY_ENTER: if (state.finished()) state.reset(); break;
             case KEY_BACKSPACE: case 127: state.backspace(); break;
+            case KEY_ENTER: state.reset(), std::mt19937 rng(config.seed); break;
+            case '\t': state.reset(); break;
                 default:
                 if (key >= ' ' && key <= '~' ) {
                     state.typeChar(static_cast<char>(key));
