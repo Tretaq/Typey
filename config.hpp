@@ -1,3 +1,7 @@
+#ifndef TYPEY_PB_FILE
+#define TYPEY_PB_FILE "pb.txt"
+#endif
+
 #pragma once
 #include <random>
 

@@ -57,7 +57,7 @@ struct TypingState {
         if (splits.size() < segments.size() && typed.size() >= segments[splits.size()].end) {
             splits.push_back(elapsedSeconds());
         }
-    }
+    } 
     void backspace() {
         if (!typed.empty() && phase != Phase::Done) {
             typed.pop_back();

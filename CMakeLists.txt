@@ -13,7 +13,8 @@ add_executable(Typey main.cpp
         Time.hpp
         worlds.hpp
         config.hpp
-        segment.hpp)
+        segment.hpp
+        pb.hpp)
 configure_file(${CMAKE_SOURCE_DIR}/words.txt ${CMAKE_BINARY_DIR}/words.txt COPYONLY)
 target_include_directories(Typey PRIVATE ${CURSES_INCLUDE_DIRS})
 target_link_libraries(Typey PRIVATE ${CURSES_LIBRARIES})
