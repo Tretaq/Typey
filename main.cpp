@@ -4,6 +4,7 @@
 #include <vector>
 #include "colors.hpp"
 #include "config.hpp"
+#include "pb.hpp"
 #include "Terminal.hpp"
 #include "typing.hpp"
 #include "worlds.hpp"
@@ -13,6 +14,9 @@ struct Test {
     std::vector<Point> layout;
     int originX = 0;
     int originY = 0;
+    std::string key = 0;
+    std::vector<double> pb;
+    bool newPb = false;
 };
 
 Test makeTest(const std::vector<std::string>& words, const Config& config, std::mt19937 rng, int width) {
@@ -117,7 +121,9 @@ int main(int argc, char *argv[]) {
     std::random_device rnd;
     std::mt19937 rng(config.seed);
     const int width = std::min(COLS - 4, 60);
-    Test test = makeTest(words,config,rng,width);
+    PbMap pbs = loadPbs(config.pbFile);
+
+    Test test = makeTest(words,config,rng,width,);
     bool running = true;
     while (running){
         drawFrame(test.state,test.layout,test.originX,test.originY,config);

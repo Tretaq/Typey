@@ -31,5 +31,19 @@ inline PbMap loadPbs(const fs::path& path) {
     return pbs;
 }
 inline void savePbs(const fs::path& path, const PbMap& pbs) {
-    fs::ofstream
+    std::error_code ec;
+    fs::create_directories(path.parent_path(),ec);
+    const fs::path tmp = path.string() + ".tmp";
+    {
+        std::ofstream out(tmp);
+        out << std::fixed << std::setprecision(3);
+        for (const auto& [key, splits] : pbs) {
+            out << key << '\t';
+            for (double t : splits) {
+                out << t << ' ';
+                out << '\n';
+            }
+        }
+    }
+    fs::rename(tmp, path, ec);
 }
