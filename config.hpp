@@ -5,6 +5,7 @@ struct Config {
     int wordCount = 25;
     unsigned seed = std::random_device{}();
     std::string worldFile = "words.txt";
+    int splitWords = 8;
 };
 Config parseArgs(int argc, char** argv) {
     Config cfg;
@@ -16,6 +17,8 @@ Config parseArgs(int argc, char** argv) {
                 cfg.seed = static_cast<unsigned>(std::stoul(argv[++i]));
             } else if (arg == "--file" && i + 1 < argc) {
                 cfg.worldFile = argv[++i];
+            } else if (arg == "--split" && i + 1 < argc){
+                cfg.splitWords = std::clamp(std::stoi(argv[++i]),1,cfg.wordCount);
             } else {
                 throw std::invalid_argument("bad or incomplete option: " + arg);
             }
