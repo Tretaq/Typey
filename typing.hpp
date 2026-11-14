@@ -2,6 +2,8 @@
 #include <string>
 #include <vector>
 #include <chrono>
+
+#include "segment.hpp"
 #include "Time.hpp"
 
 struct Point {
@@ -16,6 +18,8 @@ struct TypingState {
     Clock::time_point endTime;
     int keystrokes = 0;
     int errors = 0;
+    std::vector<Segment> segments;
+    std::vector<double> splits;
     double elapsedSeconds() const {
         using Sec = std::chrono::duration<double>;
         switch (phase) {
@@ -50,10 +54,16 @@ struct TypingState {
             endTime = Clock::now();
             phase = Phase::Done;
         }
+        if (splits.size() < segments.size() && typed.size() >= segments[splits.size()].end) {
+            splits.push_back(elapsedSeconds());
+        }
     }
     void backspace() {
         if (!typed.empty() && phase != Phase::Done) {
             typed.pop_back();
+        }
+        if (!splits.empty() && typed.size() < segments[splits.size() -1].end) {
+            splits.pop_back();
         }
     }
     size_t correctChars() const {
