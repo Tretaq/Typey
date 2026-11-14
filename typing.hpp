@@ -94,7 +94,7 @@ struct TypingState {
         phase = Phase::Waiting;
         keystrokes = 0;
         errors = 0;
-
+        splits.clear();
     }
 };
 

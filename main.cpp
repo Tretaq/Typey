@@ -18,10 +18,12 @@ struct Test {
 Test makeTest(const std::vector<std::string>& words, const Config& config, std::mt19937 rng, int width) {
     Test test;
     test.state.target = generatePassage(words, config.wordCount,rng);
+    test.state.segments = makeSegments(test.state.target, config.s)
     test.layout = layoutText(test.state.target, width);
     const int lines = test.layout.back().y + 1;
     test.originX = (COLS - width)/2;
     test.originY = (LINES - lines)/2;
+
     return test;
 }
 const int keyEsc = 27;
@@ -68,10 +70,30 @@ void drawResult(const TypingState& state, int originX, int y) {
     attroff(A_BOLD);
     mvprintw(y + 1, originX, "Enter: new passage    Tab: retry  Esc: quit");
 }
+void drawSplits(const TypingState& state, int x, int y) {
+    const std::size_t done = state.splits.size();
+    for (int i = 0 ; i < state.segments.size() ; i++) {
+        int row = y + static_cast<int>(i);
+        if (i < done) {
+            double prev = (i > 0) ? state.splits[i - 1] : 0.0;
+            mvprintw(row, x , "%2zu    %6.2fs   +%.2f", i + 1, state.splits[i], state.splits[i] - prev);
+        } else if (i == done) {
+            double last = (done > 0) ? state.splits[done - i] : 0.0;
+            attron(A_BOLD);
+            mvprintw(row,x,"%2zu    %6s    +%.2f", i + 1, "...", state.elapsedSeconds() - last);
+            attroff(A_BOLD);
+        } else {
+            attron(A_DIM);
+            mvprintw(row,x,"%2zu    ...         ", i + 1);
+            attroff(A_DIM);
+        }
+    }
+}
 void drawFrame(const TypingState& state,const std::vector<Point>& layout, int originX, int originY, Config config) {
     erase();
     mvprintw(0,0, "Typey    seed=%u    words=%d    Tab: restart   Esc: quit",config.seed,config.wordCount);
     drawText(state,layout, originX, originY);
+    drawSplits(state, 10,10);
     const int lines = layout.back().y + 1;
     const int statsY = originY + lines +  1;
     if (state.finished()) {
