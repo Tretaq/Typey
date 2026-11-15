@@ -51,6 +51,11 @@ Example: `./Typey --words 50 --split 10 --seed 42`
 | Enter (After finishing) | New passage |
 | Esc | Quit |
 
+## File template 
+Just word after word like 
+```
+are you ready to play some Deadlock
+```
 ## TO DO
 
 - More fun so like flashes and all 

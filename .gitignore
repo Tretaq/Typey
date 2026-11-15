@@ -1,14 +1,4 @@
 cmake-build-*/
 build/
-out/
 .idea/
-CMakeFiles/
-CMakeCache.txt
-cmake_install.cmake
-Makefile
-compile_commands.json
-*.o
-*.a
-*.out
-splitype
-*.pb
+pb.text*
