@@ -19,7 +19,7 @@ struct Test {
     bool newPb = false;
 };
 
-Test makeTest(const std::vector<std::string>& words, const Config& config, std::mt19937 rng, int width) {
+Test makeTest(const std::vector<std::string>& words, const Config& config, std::mt19937 rng, int width, const PbMap& pbs) {
     Test test;
     test.state.target = generatePassage(words, config.wordCount,rng);
     test.state.segments = makeSegments(test.state.target, config.splitWords);
@@ -27,7 +27,11 @@ Test makeTest(const std::vector<std::string>& words, const Config& config, std::
     const int lines = test.layout.back().y + 1;
     test.originX = (COLS - width)/2;
     test.originY = (LINES - lines)/2;
-
+    test.key = makeKey(test.state.target, config.splitWords);
+    auto it = pbs.find(test.key);
+    if (it != pbs.end() && it->second.size() == test.state.segments.size()) {
+        test.pb = it->second;
+    }
     return test;
 }
 const int keyEsc = 27;
@@ -107,7 +111,18 @@ void drawFrame(const TypingState& state,const std::vector<Point>& layout, int or
     }
     refresh();
 }
+void onFinish(Test& test, PbMap& pbs, const std::string& pbFile) {
+    const TypingState& s = test.state;
 
+    if (s.splits.size() != s.segments.size()) return;
+    if (s.correctChars() != s.target.size()) return;
+    const double total = s.splits.back();
+    if (!test.pb.empty() && total >= test.pb.back()) return;
+    test.pb = s.splits;
+    pbs[test.key] = s.splits;
+    test.newPb = true;
+    savePbs(pbFile, pbs);
+}
 int main(int argc, char *argv[]) {
     Config config;
     try {
@@ -123,7 +138,7 @@ int main(int argc, char *argv[]) {
     const int width = std::min(COLS - 4, 60);
     PbMap pbs = loadPbs(config.pbFile);
 
-    Test test = makeTest(words,config,rng,width,);
+    Test test = makeTest(words,config,rng,width,pbs);
     bool running = true;
     while (running){
         drawFrame(test.state,test.layout,test.originX,test.originY,config);
@@ -141,7 +156,11 @@ int main(int argc, char *argv[]) {
             case '\t': test.state.reset(); break;
                 default:
                 if (key >= ' ' && key <= '~' ) {
+                    const bool wasDone = test.state.finished();
                     test.state.typeChar(static_cast<char>(key));
+                    if(!wasDone && test.state.finished()) {
+                        onFinish(test, pbs,  config.pbFile);
+                    }
                 }
                 break;
 
