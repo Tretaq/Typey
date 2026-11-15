@@ -69,14 +69,35 @@ void drawText(const TypingState& state, const std::vector<Point>& layout, int or
 
     }
 }
+void loadPb(Test& test, const PbMap& pbs) {
+    test.pb.clear();
+    auto it = pbs.find(test.key);
+    if (it != pbs.end() && it->second.size() == test.state.segments.size()) {
+        test.pb = it->second;
+    }
+}
 void drawStats(const TypingState& state, int originX, int y) {
     mvprintw(y, originX, "WPM %.0f  ACC %d%%    %.1fs", state.wpm(), state.accuracy(), state.elapsedSeconds());
 }
-void drawResult(const TypingState& state, int originX, int y) {
+void drawResult(const TypingState& state, int originX, int y, const std::vector<double>& pb, bool newPb) {
+    const double total = state.elapsedSeconds();
     attron(A_BOLD);
     mvprintw(y,originX, "DONE   WPM %.0f    raw %.0f    ACC %d%%    %.2fs",state.wpm(),state.rawWpm(),state.accuracy(),state.elapsedSeconds());
     attroff(A_BOLD);
-    mvprintw(y + 1, originX, "Enter: new passage    Tab: retry  Esc: quit");
+    if (newPb) {
+        attron(COLOR_PAIR(ColGreen) | A_BOLD);
+        if (pb.empty()) {
+            mvprintw(y + 1, originX, "NEW PB!");
+        } else {
+            mvprintw(y+1, originX, "NEW PB!    %+.2f", total - pb.back());
+        }
+        attroff(COLOR_PAIR(ColGreen) | A_BOLD);
+    } else if (state.correctChars() != state.target.size()) {
+        mvprintw(y + 1, originX, "no PB: errors left in text");
+    } else if (!pb.empty()) {
+        mvprintw(y + 1, originX, "PB %.fs   (%+.2f)",pb.back(), total - pb.back());
+    }
+    mvprintw(y + 2, originX, "Enter: new passage    Tab: retry  Esc: quit");
 }
 void drawDelta(int row, int x, double delta) {
     const Color color = (delta <= 0.0) ? ColGreen : ColRed;
@@ -134,7 +155,7 @@ void drawFrame(const Test& test, const Config& config) {
     const int statsY = test.originY + lines +  1;
     drawSplits(state, test.originX, statsY + 3,test.pb);
     if (state.finished()) {
-        drawResult(state,test.originX,statsY);
+        drawResult(state,test.originX,statsY,test.pb,test.newPb);
     } else {
         drawStats(state, test.originX, statsY);
     }
@@ -147,7 +168,6 @@ void onFinish(Test& test, PbMap& pbs, const std::string& pbFile) {
     if (s.correctChars() != s.target.size()) return;
     const double total = s.splits.back();
     if (!test.pb.empty() && total >= test.pb.back()) return;
-    test.pb = s.splits;
     pbs[test.key] = s.splits;
     test.newPb = true;
     savePbs(pbFile, pbs);
@@ -182,7 +202,7 @@ int main(int argc, char *argv[]) {
                 }
                 break;
             case KEY_BACKSPACE: case 127: test.state.backspace(); break;
-            case '\t': test.state.reset(); break;
+            case '\t': test.state.reset(); test.newPb = false; loadPb(test,pbs); break;
                 default:
                 if (key >= ' ' && key <= '~' ) {
                     const bool wasDone = test.state.finished();
