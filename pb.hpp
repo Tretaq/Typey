@@ -2,7 +2,8 @@
 #include <filesystem>
 #include <map>
 #include <vector>
-
+#include <sstream>
+#include <fstream>
 namespace fs = std::filesystem;
 
 using PbMap = std::map<std::string,std::vector<double>>;
@@ -41,8 +42,8 @@ inline void savePbs(const fs::path& path, const PbMap& pbs) {
             out << key << '\t';
             for (double t : splits) {
                 out << t << ' ';
-                out << '\n';
             }
+            out << '\n';
         }
     }
     fs::rename(tmp, path, ec);

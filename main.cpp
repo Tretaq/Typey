@@ -161,7 +161,7 @@ int main(int argc, char *argv[]) {
     Test test = makeTest(words,config,rng,width,pbs);
     bool running = true;
     while (running){
-        drawFrame(test.state,test.layout,test.originX,test.originY,config);
+        drawFrame(test, config);
         const int key = getch();
         switch (key){
         case keyEsc: running = false ; break;
