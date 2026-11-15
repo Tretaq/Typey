@@ -14,7 +14,7 @@ struct Test {
     std::vector<Point> layout;
     int originX = 0;
     int originY = 0;
-    std::string key = 0;
+    std::string key;
     std::vector<double> pb;
     bool newPb = false;
 };
@@ -78,18 +78,37 @@ void drawResult(const TypingState& state, int originX, int y) {
     attroff(A_BOLD);
     mvprintw(y + 1, originX, "Enter: new passage    Tab: retry  Esc: quit");
 }
-void drawSplits(const TypingState& state, int x, int y) {
+void drawDelta(int row, int x, double delta) {
+    const Color color = (delta <= 0.0) ? ColGreen : ColRed;
+    attron(COLOR_PAIR(color));
+    mvprintw(row,x, "%+.2f",delta);
+    attroff(COLOR_PAIR(color));
+}
+void drawSplits(const TypingState& state, int x, int y, std::vector<double> pb) {
+
     const std::size_t done = state.splits.size();
+    const bool hasPb = pb.size() == state.segments.size();
+    const int deltaX = x + 26;
+    const double elapsed = state.elapsedSeconds();
+    attron(A_DIM);
+    mvprintw(y - 1, x, "%2x    %7s     %-10s%s", "#", "split", "seg",hasPb ? "vs PB" : "");
+    attroff(A_DIM);
     for (size_t i = 0 ; i < state.segments.size() ; i++) {
         int row = y + static_cast<int>(i);
         if (i < done) {
             double prev = (i > 0) ? state.splits[i - 1] : 0.0;
             mvprintw(row, x , "%2zu    %6.2fs   +%.2f", i + 1, state.splits[i], state.splits[i] - prev);
+            if (hasPb) {
+                drawDelta(row,deltaX,state.splits[i] - pb[i]);
+            }
         } else if (i == done) {
             double last = (done > 0) ? state.splits[done - 1] : 0.0;
             attron(A_BOLD);
             mvprintw(row,x,"%2zu    %6s    +%.2f", i + 1, "...", state.elapsedSeconds() - last);
             attroff(A_BOLD);
+            if (hasPb && elapsed > pb[i]) {
+                drawDelta(row,deltaX,elapsed - pb[i]);
+            }
         } else {
             attron(A_DIM);
             mvprintw(row,x,"%2zu       ...         ", i + 1);
@@ -97,17 +116,18 @@ void drawSplits(const TypingState& state, int x, int y) {
         }
     }
 }
-void drawFrame(const TypingState& state,const std::vector<Point>& layout, int originX, int originY, Config config) {
+void drawFrame(const Test& test, const Config& config) {
+    const TypingState& state = test.state;
     erase();
     mvprintw(0,0, "Typey    seed=%u    words=%d    Tab: restart   Esc: quit",config.seed,config.wordCount);
-    drawText(state,layout, originX, originY);
-    const int lines = layout.back().y + 1;
-    const int statsY = originY + lines +  1;
-    drawSplits(state, originX,statsY + 3);
+    drawText(state,test.layout, test.originX, test.originY);
+    const int lines = test.layout.back().y + 1;
+    const int statsY = test.originY + lines +  1;
+    drawSplits(state, test.originX, statsY + 3,test.pb);
     if (state.finished()) {
-        drawResult(state,originX,statsY);
+        drawResult(state,test.originX,statsY);
     } else {
-        drawStats(state, originX, statsY);
+        drawStats(state, test.originX, statsY);
     }
     refresh();
 }
@@ -149,7 +169,7 @@ int main(int argc, char *argv[]) {
                 if (test.state.finished()) {
                     config.seed = rnd();
                     rng.seed(config.seed);
-                    test = makeTest(words, config, rng, width);
+                    test = makeTest(words, config, rng, width, pbs);
                 }
                 break;
             case KEY_BACKSPACE: case 127: test.state.backspace(); break;
