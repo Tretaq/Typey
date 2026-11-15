@@ -14,8 +14,10 @@ add_executable(Typey main.cpp
         worlds.hpp
         config.hpp
         segment.hpp
-        pb.hpp)
+        pb.hpp
+)
 configure_file(${CMAKE_SOURCE_DIR}/words.txt ${CMAKE_BINARY_DIR}/words.txt COPYONLY)
+configure_file(${CMAKE_SOURCE_DIR}/ExtremeList.txt ${CMAKE_BINARY_DIR}/ExtremeList.txt COPYONLY)
 target_include_directories(Typey PRIVATE ${CURSES_INCLUDE_DIRS})
 target_link_libraries(Typey PRIVATE ${CURSES_LIBRARIES})
 

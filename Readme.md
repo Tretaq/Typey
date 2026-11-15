@@ -64,6 +64,6 @@ are you ready to play some Deadlock
 
 ## if your down here and want to experience the true horrors of this, run:
 ```shell
-./Typey --words 100 --split 10  --file ./../ExtremeList.txt         
+./Typey --words 100 --split 10  --file ./ExtremeList.txt         
 ```
 i hope you have fun <3 
