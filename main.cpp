@@ -95,7 +95,7 @@ void drawResult(const TypingState& state, int originX, int y, const std::vector<
     } else if (state.correctChars() != state.target.size()) {
         mvprintw(y + 1, originX, "no PB: errors left in text");
     } else if (!pb.empty()) {
-        mvprintw(y + 1, originX, "PB %.fs   (%+.2f)",pb.back(), total - pb.back());
+        mvprintw(y + 1, originX, "PB %.2fs   (%+.2f)",pb.back(), total - pb.back());
     }
     mvprintw(y + 2, originX, "Enter: new passage    Tab: retry  Esc: quit");
 }
@@ -127,7 +127,10 @@ void drawSplits(const TypingState& state, int x, int y, std::vector<double> pb) 
         int row = y + static_cast<int>(i);
         if (i < done) {
             double prev = (i > 0) ? state.splits[i - 1] : 0.0;
+            const bool fresh = (i + 1 == done) && state.secondsSinceLastSplit() < 0.4;
+            if (fresh) attron(A_REVERSE | A_BOLD);
             mvprintw(row, x , "%2zu    %6.2fs   +%.2f", i + 1, state.splits[i], state.splits[i] - prev);
+            if (fresh) attroff(A_REVERSE | A_BOLD);
             if (hasPb) {
                 drawDelta(row,deltaX,state.splits[i] - pb[i]);
             }

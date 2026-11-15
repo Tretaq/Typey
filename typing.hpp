@@ -29,6 +29,10 @@ struct TypingState {
         }
         return 0.0;
     }
+    double secondsSinceLastSplit() const {
+        if (phase != Phase::Running || splits.empty()) return 1e9;
+        return elapsedSeconds() - splits.back();
+    }
     std::size_t pos() const {
         return typed.size();
     }
