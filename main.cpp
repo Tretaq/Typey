@@ -90,8 +90,17 @@ void drawSplits(const TypingState& state, int x, int y, std::vector<double> pb) 
     const bool hasPb = pb.size() == state.segments.size();
     const int deltaX = x + 26;
     const double elapsed = state.elapsedSeconds();
+    const int colIdx = x;
+    const int colSplit = x+ 6;
+    const int colSeg = x + 16;
+    const int colDelta = x + 26;
     attron(A_DIM);
-    mvprintw(y - 1, x, "%2x    %7s     %-10s%s", "#", "split", "seg",hasPb ? "vs PB" : "");
+    mvprintw(y - 1, colIdx + 1, "#");
+    mvprintw(y - 1, colSplit + 2, "split");
+    mvprintw(y - 1, colSeg, "seg");
+    if (hasPb) {
+        mvprintw(y - 1, colDelta, "vs PB");
+    }
     attroff(A_DIM);
     for (size_t i = 0 ; i < state.segments.size() ; i++) {
         int row = y + static_cast<int>(i);
