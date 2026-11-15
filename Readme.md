@@ -62,3 +62,8 @@ are you ready to play some Deadlock
 - find an api with free sentences and not just RANDOM WORDS 
 - Ghost trailing ig? like in trackmania
 
+## if your down here and want to experience the true horrors of this, run:
+```shell
+./Typey --words 100 --split 10  --file ./../ExtremeList.txt         
+```
+i hope you have fun <3 
